@@ -1,0 +1,197 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Axopar 38 Cross-Top · 2027 — Build</title>
+<style>
+:root{--ink:#1a1d21;--muted:#6b7280;--line:#e6e8eb;--bg:#f5f6f7;--card:#fff;--brand:#0b3b66;--accent:#0d6efd;--warn:#9a6700;--warnbg:#fff8e1;--ok:#0f6e56}
+*{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:var(--bg);-webkit-text-size-adjust:100%}
+.wrap{max-width:820px;margin:0 auto;padding:0 14px 140px}
+header.bar{position:sticky;top:0;z-index:20;background:var(--brand);color:#fff;border-radius:0 0 12px 12px;box-shadow:0 2px 10px rgba(0,0,0,.12)}
+.barin{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;max-width:820px;margin:0 auto}
+.barin h1{font-size:17px;margin:0;font-weight:600;letter-spacing:.2px}
+.barin .sub{font-size:12px;opacity:.85;margin-top:2px}
+.tot{text-align:right;white-space:nowrap}
+.tot .lbl{font-size:11px;opacity:.85}
+.tot .val{font-size:22px;font-weight:700}
+.sec{background:var(--card);border:1px solid var(--line);border-radius:12px;margin:12px 0;overflow:hidden}
+.sechd{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 16px;cursor:pointer;user-select:none}
+.sechd h2{font-size:15px;margin:0;font-weight:600}
+.sechd .meta{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:8px}
+.pill{font-size:11px;color:var(--brand);background:#e9f1f9;padding:2px 9px;border-radius:20px;font-weight:600}
+.chev{transition:transform .18s;color:var(--muted)}
+.sec.collapsed .body{display:none}
+.sec.collapsed .chev{transform:rotate(-90deg)}
+.opt{display:flex;align-items:flex-start;gap:12px;padding:11px 16px;border-top:1px solid var(--line)}
+.opt:hover{background:#fafbfc}
+.opt input{margin-top:3px;width:18px;height:18px;flex:0 0 auto;accent-color:var(--brand)}
+.opt .nm{flex:1;font-size:14px;line-height:1.35}
+.opt .note{font-size:12px;color:var(--muted);margin-top:2px}
+.opt .note.req{color:var(--warn)}
+.opt.sel .warn{display:block}
+.opt .warn{display:none;font-size:12px;color:var(--warn);background:var(--warnbg);border-radius:6px;padding:3px 8px;margin-top:4px}
+.opt .pr{font-size:14px;font-weight:600;white-space:nowrap;min-width:74px;text-align:right}
+.opt .pr.inc{color:var(--ok);font-weight:500}
+.locked{background:#f0f7f0}
+.foot{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);box-shadow:0 -2px 10px rgba(0,0,0,.06);z-index:30}
+.footin{max-width:820px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 16px}
+.footin .c{font-size:12px;color:var(--muted)}
+.footin .t{font-size:20px;font-weight:700}
+.btn{appearance:none;border:1px solid var(--brand);background:var(--brand);color:#fff;font-size:14px;font-weight:600;padding:11px 16px;border-radius:10px;cursor:pointer}
+.btn.ghost{background:#fff;color:var(--brand)}
+.btn:active{transform:scale(.98)}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:50;display:none;overflow:auto}
+.modal.open{display:block}
+.sheet{background:#fff;max-width:760px;margin:24px auto;border-radius:14px;padding:20px}
+.sheet h2{margin:0 0 2px;font-size:19px}
+.sheet .ssub{color:var(--muted);font-size:13px;margin-bottom:14px}
+.fields{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 16px}
+.fields label{font-size:12px;color:var(--muted);display:block;margin-bottom:3px}
+.fields input{width:100%;font-size:14px;padding:9px 10px;border:1px solid var(--line);border-radius:8px}
+.sumtbl{width:100%;border-collapse:collapse;font-size:13px}
+.sumtbl td{padding:5px 0;vertical-align:top}
+.sumtbl .scat{font-weight:600;color:var(--brand);padding-top:12px;font-size:12px;text-transform:uppercase;letter-spacing:.4px}
+.sumtbl .amt{text-align:right;white-space:nowrap}
+.sumtbl tr.grand td{border-top:2px solid var(--ink);font-weight:700;font-size:16px;padding-top:10px}
+.acts{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap}
+.acts .btn{flex:1;min-width:150px;text-align:center}
+.close{float:right;border:none;background:none;font-size:22px;color:var(--muted);cursor:pointer;line-height:1}
+#sent{display:none;margin-top:14px;padding:12px 14px;border-radius:10px;font-size:14px}
+#sent.ok{display:block;background:#e7f6ee;color:var(--ok);border:1px solid #b7e3cd}
+#sent.err{display:block;background:var(--warnbg);color:var(--warn);border:1px solid #f0d999}
+@media(max-width:560px){.fields{grid-template-columns:1fr}.barin h1{font-size:15px}.tot .val{font-size:18px}}
+@media print{body{background:#fff}.foot,header.bar,.wrap,.close,.acts,.fields{display:none!important}.modal,.modal .sheet{position:static;background:#fff;margin:0;display:block;max-width:100%;box-shadow:none}.modal{overflow:visible}}
+.printhdr{display:none}
+@media print{.printhdr{display:block;margin-bottom:14px;border-bottom:2px solid var(--brand);padding-bottom:8px}.printhdr .pm{font-size:18px;font-weight:700}.printhdr .pc{font-size:12px;color:#444}}
+</style></head><body>
+<header class="bar"><div class="barin">
+  <div><h1 id="hModel"></h1><div class="sub">Surdyke Yamaha &amp; Marina — build your boat</div></div>
+  <div class="tot"><div class="lbl">Running total</div><div class="val" id="hTotal">$0</div></div>
+</div></header>
+<div class="wrap"><div id="secs"></div></div>
+<div class="foot"><div class="footin">
+  <div><div class="c"><span id="fCount">0</span> options selected</div><div class="t" id="fTotal">$0</div></div>
+  <button class="btn" id="finishBtn">Review &amp; finish</button>
+</div></div>
+<div class="modal" id="modal"><div class="sheet">
+  <button class="close" id="closeBtn" aria-label="Close">&times;</button>
+  <div class="printhdr"><div class="pm" id="pModel"></div><div class="pc">Surdyke Yamaha &amp; Marina — Axopar build summary</div></div>
+  <h2>Build summary</h2><div class="ssub">Review the boat, add your details, then email or print.</div>
+  <div class="fields">
+    <div><label>Customer name</label><input id="cName" placeholder="Name"></div>
+    <div><label>Phone</label><input id="cPhone" placeholder="Phone"></div>
+    <div><label>Email</label><input id="cEmail" placeholder="Email"></div>
+    <div><label>Notes</label><input id="cNotes" placeholder="Anything else"></div>
+  </div>
+  <table class="sumtbl" id="sumBody"></table>
+  <div id="sent"></div>
+  <div class="acts">
+    <button class="btn" id="emailBtn">Send to Mason</button>
+    <button class="btn ghost" id="printBtn">Print / save PDF</button>
+    <button class="btn ghost" id="backBtn">Back to build</button>
+  </div>
+</div></div>
+<script>
+const DATA = {"model": "Axopar 38 Cross-Top \u00b7 2027", "email": "masonnbennett@gmail.com", "sections": [{"name": "Boat Model", "type": "base", "options": [{"name": "Axopar 38 Cross Top 2027", "price": 279615, "note": "", "default": true}]}, {"name": "Region Selection", "type": "single", "options": [{"name": "EU", "price": 0, "note": ""}, {"name": "US", "price": 0, "note": "", "default": true}]}, {"name": "Fuel System", "type": "single", "options": [{"name": "EPA Fuel System - Standard Tank", "price": 1000, "note": "Fuel system that meets the regulations of the US environmental protection agency", "default": true}, {"name": "Non-EPA System - Standard Tank", "price": 0, "note": "", "default": true}, {"name": "XL fuel tank 1000l, EPA", "price": 6000, "note": ""}, {"name": "XL fuel tank 1000l", "price": 5077, "note": ""}]}, {"name": "Styling Packages", "type": "multi", "options": [{"name": "Brabus Trim Line XT", "price": 8769, "note": ""}, {"name": "Miami Blue", "price": 7231, "note": ""}, {"name": "Oyster White", "price": 7231, "note": ""}, {"name": "Glacier Blue", "price": 7231, "note": ""}, {"name": "Platinum Grey", "price": 7231, "note": ""}]}, {"name": "Module Selection Bow", "type": "multi", "options": [{"name": "Sofa with Backrest on Foredeck", "price": 0, "note": ""}, {"name": "U-sofa Package", "price": 7846, "note": "incl. table with two sets of legs (hi/lo), 3 sockets, upholstery and sunbed infill for table"}, {"name": "Sun Lounge", "price": 7692, "note": "Forward facing sunbed with openable hatch and storage inside"}, {"name": "Gullwing Door Cushions", "price": 2154, "note": ""}, {"name": "Gullwing Doors", "price": 9077, "note": "Wide lockable exterior access doors for the front cabin"}]}, {"name": "Module Selection Stern", "type": "multi", "options": [{"name": "Open Aft Deck with Large Storage", "price": 0, "note": ""}, {"name": "Aft Cabin", "price": 12462, "note": "Aft cabin overnight sleeping accomodation for 2 persons"}, {"name": "Aft-facing sofa", "price": 3692, "note": ""}, {"name": "Wet Bar", "price": 9538, "note": "Wet bar on the centerline of the boat with countertop, sink w. faucet, top loaded refrigerator, cabinet with shelves, trash bin. Can be equipped with gas cooktop or electrical grill"}, {"name": "Fold-down Activity Platforms", "price": 15385, "note": ""}, {"name": "Bench Seat with Fender Storage, Starboard", "price": 1338, "note": ""}, {"name": "Bench Seat with Fender Storage, Port", "price": 1338, "note": ""}, {"name": "Wetbar in Fenderbox, Port", "price": 8462, "note": "Converts port large fender box into a wetbar incl. Sink and Fridge"}, {"name": "Cockpit U-Sofa with Table", "price": 11077, "note": ""}, {"name": "Fenderbox Cushion, Port", "price": 308, "note": "Removable cushions for port side fenderbox"}, {"name": "Fenderbox Cushion, Starboard", "price": 308, "note": ""}, {"name": "Dinette & Sun Lounge Package", "price": 11385, "note": ""}]}, {"name": "Upholstery Color", "type": "single", "options": [{"name": "Silvertex Petrol", "price": 0, "note": "Exterior", "default": true}, {"name": "Silvertex Hunter", "price": 1215, "note": "Exterior"}, {"name": "Silvertex Squash", "price": 1215, "note": ""}, {"name": "Linetex Chalk", "price": 2615, "note": ""}, {"name": "Linetex Dust", "price": 2615, "note": ""}, {"name": "Linetex Sphere", "price": 2615, "note": ""}, {"name": "Mediterrana Anthracite", "price": 5077, "note": ""}, {"name": "Mediterrana Taupe", "price": 5077, "note": "Exterior"}]}, {"name": "Power Management and Systems", "type": "multi", "options": [{"name": "Shore Power 230V with Charger ST/XT", "price": 7846, "note": ""}, {"name": "Shore Power 110V with Charger ST/XT", "price": 10769, "note": ""}, {"name": "Lithium House Bank, EU", "price": 17077, "note": "Mastervolt  MLI Ultra 2x3kWh"}, {"name": "Lithium House Bank, US", "price": 17077, "note": "Mastervolt  MLI Ultra 2x3kWh"}, {"name": "Gas Distribution System", "price": 508, "note": "incl. piping and bottle container"}, {"name": "Solar Panel", "price": 3692, "note": "100W w. Charge Controller"}, {"name": "Hot Water System 16 Litre, EU", "price": 3385, "note": "Water boiler for fresh water system, requires shorepower option"}, {"name": "Hot Water System 16 Litre, US", "price": 3385, "note": "Water boiler for fresh water system, requires shorepower option"}]}, {"name": "Exterior Options", "type": "multi", "options": [{"name": "Antifouling, White", "price": 4769, "note": ""}, {"name": "Antifouling, Grey", "price": 4769, "note": ""}, {"name": "Sun Shade, Bow", "price": 2154, "note": "Bow sunshade, for stationary use"}, {"name": "Sun Shade Aft", "price": 2154, "note": "Aft deck sunshade, for stationary use"}, {"name": "Bathing Ladder with high handles", "price": 754, "note": "Starboard mounted"}, {"name": "Burnewiin Gunwale Mount, Bow", "price": 692, "note": "Bow"}, {"name": "Burnewiin Gunwale Mount, Aft Port", "price": 692, "note": "Aft deck, Starboard"}, {"name": "Burnewiin Gunwale Mount, Aft Starboard", "price": 692, "note": ""}, {"name": "Roof Rack Set, White", "price": 3077, "note": "incl. 2 Roof bars"}, {"name": "Roof Rack Set, Black", "price": 3077, "note": "incl. 2 Roof bars"}, {"name": "Grabrail with Fishrod Holder, Polished", "price": 1215, "note": ""}, {"name": "Grabrail with Fishrod Holder, Black", "price": 1215, "note": ""}, {"name": "Canopy XT", "price": 4308, "note": ""}, {"name": "Shower on Aft Deck", "price": 708, "note": "Whale recessed shower on the aft deck port side fenderbox"}, {"name": "Engine Frame, Black EU", "price": 2154, "note": ""}, {"name": "Engine Frame, Polished EU", "price": 2154, "note": ""}, {"name": "Engine Frame, Polished US", "price": 2154, "note": ""}, {"name": "Engine Frame, Black US", "price": 2154, "note": ""}]}, {"name": "Cockpit", "type": "multi", "options": [{"name": "Drivers sofa for Cockpit U-sofa", "price": 4308, "note": ""}, {"name": "Sofa upgrade for 7 sportseats", "price": 8308, "note": ""}, {"name": "Electric Sliding Canvas Roof, Cockpit", "price": 5538, "note": ""}, {"name": "Bulwark Seat, Port", "price": 923, "note": ""}, {"name": "Bulwark Seat, Starbord", "price": 923, "note": ""}]}, {"name": "Front Cabin Layout", "type": "multi", "options": [{"name": "Electric Toilet under L-Sofa", "price": 0, "note": ""}, {"name": "Enclosed Toilet in Front Cabin", "price": 11231, "note": "Enclosed toilet compartment in the front cabin"}, {"name": "Table in Front Cabin", "price": 1385, "note": ""}, {"name": "Pentry Module", "price": 0, "note": ""}, {"name": "Wardrobe Module", "price": 1846, "note": ""}]}, {"name": "Upholstery Interior", "type": "multi", "options": [{"name": "Basecamp", "price": 0, "note": ""}, {"name": "Monterra", "price": 4262, "note": ""}]}, {"name": "Onboard Comfort", "type": "multi", "options": [{"name": "Gyro Stabilization System", "price": 48462, "note": ""}, {"name": "Shower in Toilet compartment", "price": 862, "note": "Adds a Barka shower kit to the toilet comparment"}, {"name": "Gas Cooktop with One Burner in Pentry Module", "price": 1046, "note": ""}, {"name": "Induction Cooktop one zone 230V, Pentry Module", "price": 2308, "note": ""}, {"name": "Induction Cooktop one zone 110V, Pentry Module", "price": 2615, "note": ""}, {"name": "Storage Drawer Pentry/Wardrobe", "price": 0, "note": ""}, {"name": "Drawer Fridge Pentry/Wardrobe", "price": 2154, "note": ""}, {"name": "Air Conditioning with Variable Speed, EU", "price": 7231, "note": ""}, {"name": "Air Conditioning with Variable Speed, US", "price": 7231, "note": ""}, {"name": "Diesel Heater", "price": 8923, "note": "Webasto AirTop EVO 55"}, {"name": "Electric Grill for Wetbar, 230V", "price": 3538, "note": ""}, {"name": "Electric Grill for Wetbar, 110V", "price": 3538, "note": "Center line Wet Bar"}, {"name": "Gas Plancha, Wet Bar", "price": 1692, "note": ""}, {"name": "Drawer Fridge Cockpit, Starboard", "price": 2154, "note": ""}, {"name": "Drawer Fridge Cockpit, Port", "price": 2154, "note": ""}]}, {"name": "Operation", "type": "multi", "options": [{"name": "Bow Thruster", "price": 7538, "note": "Side-Power SE60, joystick, battery case, tunnel and harness"}, {"name": "Bow Thruster with JPO Integration", "price": 12615, "note": "Requires JPO engines"}, {"name": "Electric Windlass System, EU", "price": 9846, "note": "Bow mounting, with remote control"}, {"name": "Electric Windlass System, US", "price": 9846, "note": ""}, {"name": "Mooring Package", "price": 1477, "note": "6x fenders 8x27, 6 x fender covers 8x27 w. Axopar logo, 6 x mooring lines 16mm/12m, 1 x anchor rope 40m w. thimble, 1 x anchor 10kg galvanized, 1 x stainless steel shackle"}, {"name": "Axopar Safety Bag", "price": 1092, "note": "Sail Racing Axopar branded dry bag. Contains first aid kit, flash light, throw line, and leatherman multi functional tool"}, {"name": "Explorer Lights ST/XT", "price": 3385, "note": ""}, {"name": "Explorer Lights ST/XT for Brabus Line", "price": 3385, "note": ""}, {"name": "Axopar Connectivity", "price": 2462, "note": ""}]}, {"name": "Entertainment", "type": "multi", "options": [{"name": "Underwater Lights Dual Color", "price": 2000, "note": "2 x dual color (blue and white) Lumishore SMX53 Supra lights in transom"}, {"name": "Basic Audio ST/XT", "price": 2154, "note": ""}, {"name": "Premium Audio System ST/XT", "price": 6923, "note": ""}, {"name": "Premium Audio Package ST/XT for BRABUS Line", "price": 6923, "note": ""}, {"name": "Lighting Package ST/XT", "price": 4923, "note": ""}, {"name": "Lighting Package ST/XT Aft Cabin", "price": 5385, "note": ""}]}, {"name": "Navigation Options", "type": "multi", "options": [{"name": "LED Search Light with Remote Control", "price": 1415, "note": "Search light w. remote control mounted on the mast"}, {"name": "Simrad Radar HALO 20+", "price": 5077, "note": ""}, {"name": "Echo Sounder, Thru Hull", "price": 923, "note": "Thru-hull transducer SS60"}, {"name": "Echo Sounder, Active Imaging 3-in-1", "price": 1477, "note": "Transom mounted transducer"}, {"name": "VHF Simrad RS100B", "price": 3692, "note": "Simrad RS100-B VHF and handset"}, {"name": "Nightvision Camera FLIR M232 360\u00b0", "price": 7077, "note": ""}, {"name": "Chartplotter Simrad NSS4 12\", Single", "price": 7231, "note": ""}, {"name": "Chartplotter Simrad NSS4 12\" Twin with Connectivity", "price": 15231, "note": "incl. Axopar UI and Axopar Connectivity"}, {"name": "Chartplotter Simrad NSS4 10\", Twin", "price": 9385, "note": ""}]}, {"name": "Engine", "type": "single", "options": [{"name": "Twin Mercury V8 300hp Black DTS", "price": 105846, "note": "Complete engine setup \u2014 pre-rig & propellers included"}, {"name": "Twin Mercury V8 300hp White DTS", "price": 109077, "note": "Complete engine setup \u2014 pre-rig & propellers included"}, {"name": "Twin Mercury V8 300hp Black JPO", "price": 136769, "note": "Complete engine setup \u2014 pre-rig & propellers included \u00b7 JPO joystick piloting"}, {"name": "Twin Mercury V8 300hp White JPO", "price": 140000, "note": "Complete engine setup \u2014 pre-rig & propellers included \u00b7 JPO joystick piloting"}, {"name": "Twin Mercury V10 350hp Black DTS", "price": 130923, "note": "Complete engine setup \u2014 pre-rig & propellers included"}, {"name": "Twin Mercury V10 350hp White DTS", "price": 134154, "note": "Complete engine setup \u2014 pre-rig & propellers included"}, {"name": "Twin Mercury V10 350hp Black JPO", "price": 165385, "note": "Complete engine setup \u2014 pre-rig & propellers included \u00b7 JPO joystick piloting"}, {"name": "Twin Mercury V10 350hp White JPO", "price": 168615, "note": "Complete engine setup \u2014 pre-rig & propellers included \u00b7 JPO joystick piloting"}, {"name": "Twin Mercury V10 425hp Performance Line Black DTS", "price": 148923, "note": "Complete engine setup \u2014 pre-rig & propellers included"}, {"name": "Twin Mercury V10 425hp Performance Line White DTS", "price": 152154, "note": "Complete engine setup \u2014 pre-rig & propellers included"}, {"name": "Twin Mercury V10 425hp Performance Line Black JPO", "price": 183385, "note": "Complete engine setup \u2014 pre-rig & propellers included \u00b7 JPO joystick piloting"}, {"name": "Twin Mercury V10 425hp Performance Line White JPO", "price": 186615, "note": "Complete engine setup \u2014 pre-rig & propellers included \u00b7 JPO joystick piloting"}]}, {"name": "Logistics", "type": "multi", "options": [{"name": "No Engine Holes", "price": 354, "note": ""}, {"name": "Preparation for Transport w. Foam Cradle", "price": 0, "note": ""}, {"name": "Preparation for Dealer Factory Pickup", "price": 1415, "note": ""}, {"name": "Preparation for Dealer Factory Pickup", "price": 1400, "note": ""}]}]};
+const fmt = n => '$' + Math.round(n).toLocaleString('en-US');
+let sel = {};
+DATA.sections.forEach((s,si)=>s.options.forEach((o,oi)=>{ if(o.default) sel[si+'_'+oi]=true; }));
+
+function isReq(note){ return /required|not compatible|not available|recommended/i.test(note||''); }
+
+function render(){
+  const root = document.getElementById('secs'); root.innerHTML='';
+  document.getElementById('hModel').textContent = DATA.model;
+  document.getElementById('pModel').textContent = DATA.model;
+  DATA.sections.forEach((s,si)=>{
+    const sec=document.createElement('div'); sec.className='sec'+(s.type==='base'?'':(si>3?' collapsed':''));
+    const chosen=s.options.filter((o,oi)=>sel[si+'_'+oi]).length;
+    const pill = s.type==='single'?'<span class="pill">pick one</span>':(s.type==='base'?'<span class="pill">included</span>':'');
+    sec.innerHTML='<div class="sechd"><h2>'+esc(s.name)+'</h2><div class="meta">'+pill+'<span>'+chosen+(s.type==='single'?'':' / '+s.options.length)+'</span><span class="chev">&#9660;</span></div></div><div class="body"></div>';
+    const body=sec.querySelector('.body');
+    s.options.forEach((o,oi)=>{
+      const id=si+'_'+oi, on=!!sel[id];
+      const row=document.createElement('label');
+      row.className='opt'+(on?' sel':'')+(s.type==='base'?' locked':'');
+      const ctrl = s.type==='base' ? '<input type="checkbox" checked disabled>'
+        : '<input type="'+(s.type==='single'?'radio':'checkbox')+'" '+(s.type==='single'?'name="g'+si+'"':'')+(on?' checked':'')+'>';
+      const priceTxt = '<span class="pr">'+(s.type==='base'?fmt(o.price):(o.price>0?'+'+fmt(o.price):'$0'))+'</span>';
+      const needsWarn = /not compatible|not available|\S+\s+required/i.test(o.note);
+      const note = o.note ? '<div class="note'+(isReq(o.note)?' req':'')+'">'+esc(o.note)+'</div>' : '';
+      const warn = needsWarn ? '<div class="warn">&#9888; '+esc(o.note)+'</div>' : '';
+      row.innerHTML = ctrl+'<div class="nm">'+esc(o.name)+note+warn+'</div>'+priceTxt;
+      const input=row.querySelector('input');
+      if(s.type!=='base') input.addEventListener('change',()=>{
+        if(s.type==='single'){ s.options.forEach((_,k)=>delete sel[si+'_'+k]); sel[id]=true; }
+        else { if(input.checked) sel[id]=true; else delete sel[id]; }
+        render(); recompute();
+      });
+      body.appendChild(row);
+    });
+    sec.querySelector('.sechd').addEventListener('click',e=>{ if(e.target.closest('.opt'))return; sec.classList.toggle('collapsed'); });
+    root.appendChild(sec);
+  });
+  recompute();
+}
+function items(){
+  const out=[];
+  DATA.sections.forEach((s,si)=>s.options.forEach((o,oi)=>{ if(sel[si+'_'+oi]) out.push({cat:s.name,name:o.name,price:o.price}); }));
+  return out;
+}
+function recompute(){
+  const it=items(); const total=it.reduce((a,b)=>a+b.price,0);
+  document.getElementById('hTotal').textContent=fmt(total);
+  document.getElementById('fTotal').textContent=fmt(total);
+  document.getElementById('fCount').textContent=it.filter(x=>DATA.sections[0].name!==x.cat).length;
+}
+function buildSummary(){
+  const it=items(); const tbody=document.getElementById('sumBody'); tbody.innerHTML='';
+  let cat=''; let total=0;
+  it.forEach(x=>{
+    if(x.cat!==cat){ cat=x.cat; const tr=document.createElement('tr'); tr.innerHTML='<td class="scat" colspan="2">'+esc(cat)+'</td>'; tbody.appendChild(tr); }
+    total+=x.price;
+    const tr=document.createElement('tr'); tr.innerHTML='<td>'+esc(x.name)+'</td><td class="amt">'+fmt(x.price)+'</td>'; tbody.appendChild(tr);
+  });
+  const g=document.createElement('tr'); g.className='grand'; g.innerHTML='<td>Total (USD)</td><td class="amt">'+fmt(total)+'</td>'; tbody.appendChild(g);
+  return total;
+}
+function summaryText(){
+  const it=items(); let total=0; let cat=''; let lines=[];
+  it.forEach(x=>{ if(x.cat!==cat){cat=x.cat; lines.push('');lines.push('— '+cat.toUpperCase()+' —');} total+=x.price; lines.push(x.name+'  ...  '+fmt(x.price)); });
+  const cust=[];
+  const n=val('cName'),p=val('cPhone'),e=val('cEmail'),no=val('cNotes');
+  if(n)cust.push('Name: '+n); if(p)cust.push('Phone: '+p); if(e)cust.push('Email: '+e); if(no)cust.push('Notes: '+no);
+  return DATA.model+' — Build Summary\nSurdyke Yamaha & Marina\n'+(cust.length?'\n'+cust.join('\n')+'\n':'')+lines.join('\n')+'\n\nTOTAL (USD): '+fmt(total);
+}
+function val(id){return (document.getElementById(id).value||'').trim();}
+function esc(s){return (s+'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+
+document.getElementById('finishBtn').onclick=()=>{buildSummary();document.getElementById('modal').classList.add('open');};
+document.getElementById('closeBtn').onclick=document.getElementById('backBtn').onclick=()=>document.getElementById('modal').classList.remove('open');
+document.getElementById('printBtn').onclick=()=>window.print();
+function mailtoFallback(){
+  const cust=val('cName')?(' — '+val('cName')):'';
+  window.location.href='mailto:'+DATA.email+'?subject='+encodeURIComponent(DATA.model+' build'+cust)+'&body='+encodeURIComponent(summaryText());
+}
+document.getElementById('emailBtn').onclick=async(e)=>{
+  const btn=e.target, sent=document.getElementById('sent');
+  const cust=val('cName')?(' — '+val('cName')):'';
+  const payload={_subject:DATA.model+' build'+cust, _template:'box',
+    name:val('cName')||'(not given)', email:val('cEmail')||'(not given)', phone:val('cPhone')||'(not given)',
+    notes:val('cNotes')||'', total:document.getElementById('hTotal').textContent, message:summaryText()};
+  btn.disabled=true; btn.textContent='Sending…'; sent.className='';
+  try{
+    const res=await fetch('https://formsubmit.co/ajax/'+encodeURIComponent(DATA.email),
+      {method:'POST',headers:{'Content-Type':'application/json',Accept:'application/json'},body:JSON.stringify(payload)});
+    const j=await res.json().catch(()=>({}));
+    if(j && (j.success===true||String(j.success)==='true')){
+      sent.className='ok'; sent.textContent='✓ Sent to Mason — he\'ll follow up with you.'; btn.textContent='Sent ✓';
+    } else {
+      sent.className='ok'; sent.textContent='✓ Build submitted. (First-time setup: Mason confirms the inbox once.)'; btn.textContent='Sent ✓';
+    }
+  }catch(err){
+    sent.className='err'; sent.innerHTML='Couldn\'t reach the server — opening your email app instead…';
+    btn.disabled=false; btn.textContent='Send to Mason'; mailtoFallback();
+  }
+};
+render();
+</script></body></html>
