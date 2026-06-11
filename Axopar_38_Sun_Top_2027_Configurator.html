@@ -18,6 +18,12 @@ header.bar{position:sticky;top:0;z-index:20;background:var(--brand);color:#fff;b
 .sechd h2{font-size:15px;margin:0;font-weight:600}
 .sechd .meta{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:8px}
 .pill{font-size:11px;color:var(--brand);background:#e9f1f9;padding:2px 9px;border-radius:20px;font-weight:600}
+.pill.req{color:#b3261e;background:#fdecea}
+.pill.ok{color:var(--ok);background:#e7f6ee}
+.fuelhint{font-size:12px;color:var(--brand);background:#eef4fb;padding:9px 16px;border-top:1px solid var(--line)}
+.fit{display:inline-block;font-size:11px;color:var(--ok);background:#e7f6ee;border-radius:10px;padding:1px 8px;margin-left:6px;font-weight:600}
+.footmsg{display:none;background:var(--warnbg);color:var(--warn);font-size:13px;font-weight:600;padding:7px 16px;text-align:center;border-bottom:1px solid #f0d999}
+.sec.flash{border-color:#b3261e;box-shadow:0 0 0 2px rgba(179,38,30,.25)}
 .chev{transition:transform .18s;color:var(--muted)}
 .sec.collapsed .body{display:none}
 .sec.collapsed .chev{transform:rotate(-90deg)}
@@ -68,7 +74,7 @@ header.bar{position:sticky;top:0;z-index:20;background:var(--brand);color:#fff;b
   <div class="tot"><div class="lbl">Running total</div><div class="val" id="hTotal">$0</div></div>
 </div></header>
 <div class="wrap"><div id="secs"></div></div>
-<div class="foot"><div class="footin">
+<div class="foot"><div id="footMsg" class="footmsg"></div><div class="footin">
   <div><div class="c"><span id="fCount">0</span> options selected</div><div class="t" id="fTotal">$0</div></div>
   <button class="btn" id="finishBtn">Review &amp; finish</button>
 </div></div>
@@ -95,19 +101,33 @@ const DATA = {"model": "Axopar 38 Sun Top \u00b7 2027", "email": "masonnbennett@
 const fmt = n => '$' + Math.round(n).toLocaleString('en-US');
 let sel = {};
 DATA.sections.forEach((s,si)=>s.options.forEach((o,oi)=>{ if(o.default) sel[si+'_'+oi]=true; }));
+let collapsedState = {};
+DATA.sections.forEach((s,si)=>{ collapsedState[si] = (s.type!=='base' && si>3); });
 
 function isReq(note){ return /required|not compatible|not available|recommended/i.test(note||''); }
+function hasEngine(){ return DATA.sections.some((s,si)=> s.name==='Engine' && s.options.some((o,oi)=>sel[si+'_'+oi])); }
+function engAttrs(){ let e=null; DATA.sections.forEach((s,si)=>{ if(s.name==='Engine') s.options.forEach((o,oi)=>{ if(sel[si+'_'+oi]) e=o; }); }); if(!e) return null; const l=e.name.toLowerCase(); return {name:e.name, count:/triple/.test(l)?'triple':/twin/.test(l)?'twin':null, block:/v10/.test(l)?'v10':/v8/.test(l)?'v8':/v6/.test(l)?'v6':null}; }
+function fuelMatch(name){ const ea=engAttrs(); if(!ea) return null; const l=name.toLowerCase(); if(!/twin|triple|v8|v10|v6/.test(l)) return null; const cOk=!ea.count||l.includes(ea.count); const bOk=!ea.block||l.includes(ea.block); return cOk&&bOk; }
 
 function render(){
   const root = document.getElementById('secs'); root.innerHTML='';
   document.getElementById('hModel').textContent = DATA.model;
   document.getElementById('pModel').textContent = DATA.model;
   DATA.sections.forEach((s,si)=>{
-    const sec=document.createElement('div'); sec.className='sec'+(s.type==='base'?'':(si>3?' collapsed':''));
+    const sec=document.createElement('div'); sec.className='sec'+(collapsedState[si]?' collapsed':'');
     const chosen=s.options.filter((o,oi)=>sel[si+'_'+oi]).length;
-    const pill = s.type==='single'?'<span class="pill">pick one</span>':(s.type==='base'?'<span class="pill">included</span>':'');
+    let pill='';
+    if(s.type==='base') pill='<span class="pill">included</span>';
+    else if(s.name==='Engine') pill = hasEngine()?'<span class="pill ok">selected</span>':'<span class="pill req">required</span>';
+    else if(s.type==='single') pill='<span class="pill">pick one</span>';
     sec.innerHTML='<div class="sechd"><h2>'+esc(s.name)+'</h2><div class="meta">'+pill+'<span>'+chosen+(s.type==='single'?'':' / '+s.options.length)+'</span><span class="chev">&#9660;</span></div></div><div class="body"></div>';
     const body=sec.querySelector('.body');
+    const ea=engAttrs();
+    if(s.name==='Fuel System' && ea && (ea.count||ea.block) && s.options.some(o=>/twin|triple|v8|v10/i.test(o.name))){
+      const h=document.createElement('div'); h.className='fuelhint';
+      h.innerHTML='&#9889; Your engine is <b>'+esc(((ea.count||'')+' '+(ea.block||'').toUpperCase()).trim())+'</b> — pick the matching fuel system below (tagged), then your region.';
+      body.appendChild(h);
+    }
     s.options.forEach((o,oi)=>{
       const id=si+'_'+oi, on=!!sel[id];
       const row=document.createElement('label');
@@ -118,7 +138,9 @@ function render(){
       const needsWarn = /not compatible|not available|\S+\s+required/i.test(o.note);
       const note = o.note ? '<div class="note'+(isReq(o.note)?' req':'')+'">'+esc(o.note)+'</div>' : '';
       const warn = needsWarn ? '<div class="warn">&#9888; '+esc(o.note)+'</div>' : '';
-      row.innerHTML = ctrl+'<div class="nm">'+esc(o.name)+note+warn+'</div>'+priceTxt;
+      const fm = (s.name==='Fuel System')?fuelMatch(o.name):null;
+      const fit = fm===true ? '<span class="fit">&#10003; fits your engine</span>' : '';
+      row.innerHTML = ctrl+'<div class="nm">'+esc(o.name)+fit+note+warn+'</div>'+priceTxt;
       const input=row.querySelector('input');
       if(s.type!=='base') input.addEventListener('change',()=>{
         if(s.type==='single'){ s.options.forEach((_,k)=>delete sel[si+'_'+k]); sel[id]=true; }
@@ -127,7 +149,7 @@ function render(){
       });
       body.appendChild(row);
     });
-    sec.querySelector('.sechd').addEventListener('click',e=>{ if(e.target.closest('.opt'))return; sec.classList.toggle('collapsed'); });
+    sec.querySelector('.sechd').addEventListener('click',e=>{ if(e.target.closest('.opt'))return; collapsedState[si]=!collapsedState[si]; sec.classList.toggle('collapsed'); });
     root.appendChild(sec);
   });
   recompute();
@@ -142,6 +164,7 @@ function recompute(){
   document.getElementById('hTotal').textContent=fmt(total);
   document.getElementById('fTotal').textContent=fmt(total);
   document.getElementById('fCount').textContent=it.filter(x=>DATA.sections[0].name!==x.cat).length;
+  const m=document.getElementById('footMsg'); if(m && hasEngine()){ m.style.display='none'; }
 }
 function buildSummary(){
   const it=items(); const tbody=document.getElementById('sumBody'); tbody.innerHTML='';
@@ -165,7 +188,16 @@ function summaryText(){
 function val(id){return (document.getElementById(id).value||'').trim();}
 function esc(s){return (s+'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
 
-document.getElementById('finishBtn').onclick=()=>{buildSummary();document.getElementById('modal').classList.add('open');};
+function flagEngineRequired(){
+  const sec=[...document.querySelectorAll('.sec')].find(s=>s.querySelector('h2').textContent==='Engine');
+  if(sec){ const si=[...document.querySelectorAll('.sec')].indexOf(sec); sec.classList.remove('collapsed');
+    sec.classList.add('flash'); sec.scrollIntoView({behavior:'smooth',block:'center'}); setTimeout(()=>sec.classList.remove('flash'),1700); }
+  const m=document.getElementById('footMsg'); if(m){ m.textContent='⚠ Select an engine to finish your build.'; m.style.display='block'; }
+}
+document.getElementById('finishBtn').onclick=()=>{
+  if(!hasEngine()){ flagEngineRequired(); return; }
+  buildSummary(); document.getElementById('modal').classList.add('open');
+};
 document.getElementById('closeBtn').onclick=document.getElementById('backBtn').onclick=()=>document.getElementById('modal').classList.remove('open');
 document.getElementById('printBtn').onclick=()=>window.print();
 function mailtoFallback(){
